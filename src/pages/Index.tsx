@@ -23,11 +23,11 @@ export default function Index() {
   // Update page title when data changes
   useSeoMeta({
     title: data
-      ? `${data.location.city} – ${data.current.tempC}°C, ${data.current.description} | WeatherWave`
-      : 'WeatherWave – Beautiful Weather Forecasts',
+      ? `${data.location.city} – ${data.current.tempC}°C, ${data.current.description} | Tempest`
+      : 'Tempest – Beautiful Weather Forecasts',
     description:
       'Real-time weather forecasts powered by wttr.in. Search any city for current conditions and a 3-day outlook.',
-    ogTitle: 'WeatherWave',
+    ogTitle: 'Tempest',
     ogDescription: 'Beautiful weather forecasts for any location on Earth.',
   });
 
@@ -67,7 +67,7 @@ export default function Index() {
           <div className="flex items-center gap-2 text-white">
             <CloudSun size={28} className="shrink-0" />
             <div>
-              <h1 className="text-xl md:text-2xl font-bold leading-tight">WeatherWave</h1>
+              <h1 className="text-xl md:text-2xl font-bold leading-tight">Tempest</h1>
               <p className="text-white/60 text-xs hidden sm:block">
                 Powered by wttr.in · wego-style
               </p>
