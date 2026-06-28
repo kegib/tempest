@@ -188,3 +188,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Thin scrollbar for hourly forecast strip */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  height: 4px;
+}
+.scrollbar-thumb-white\/20::-webkit-scrollbar-thumb {
+  background-color: rgb(255 255 255 / 0.2);
+  border-radius: 9999px;
+}
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Smooth colour transition on the gradient background */
+@media (prefers-reduced-motion: no-preference) {
+  .transition-gradient {
+    transition: background 0.7s ease;
+  }
+}
