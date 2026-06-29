@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { Copy, Check, Terminal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { buildForecastText } from '@/lib/weatherApi';
 import type { WeatherData } from '@/lib/weatherTypes';
 
@@ -19,32 +17,33 @@ export function ForecastTextBox({ data }: Props) {
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
-        <div className="flex items-center gap-2 text-white/70 text-sm">
-          <Terminal size={14} />
-          <span>wttr-style summary · share-ready</span>
-        </div>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="text-white/70 hover:text-white hover:bg-white/10 h-7 px-2"
+    <div className="font-mono text-sm">
+      {/* Box top */}
+      <div className="flex text-ansi-dim">
+        <span>┌─</span>
+        <span className="text-ansi-cyan px-1">plain text output</span>
+        <span className="flex-1 border-t border-dashed border-[var(--ansi-dim)]" style={{ minWidth: '8px' }} />
+        <button
+          type="button"
           onClick={handleCopy}
+          className={`px-2 text-xs transition-colors ${copied ? 'text-ansi-green' : 'text-ansi-dim hover:text-ansi-cyan'}`}
         >
-          {copied ? (
-            <>
-              <Check size={13} className="mr-1" /> Copied
-            </>
-          ) : (
-            <>
-              <Copy size={13} className="mr-1" /> Copy
-            </>
-          )}
-        </Button>
+          {copied ? '[COPIED ✓]' : '[COPY]'}
+        </button>
+        <span>┐</span>
       </div>
-      <pre className="p-4 text-white/90 text-sm font-mono whitespace-pre-wrap break-all leading-relaxed">
+
+      {/* Content */}
+      <pre className="border-l border-r border-[var(--ansi-dim)] px-3 py-2 text-ansi-green whitespace-pre-wrap break-all leading-relaxed crt-glow overflow-x-auto">
         {text}
       </pre>
+
+      {/* Box bottom */}
+      <div className="flex text-ansi-dim">
+        <span>└</span>
+        <span className="flex-1 border-t border-dashed border-[var(--ansi-dim)]" style={{ minWidth: '8px' }} />
+        <span>┘</span>
+      </div>
     </div>
   );
 }

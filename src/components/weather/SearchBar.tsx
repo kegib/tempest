@@ -1,7 +1,5 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react';
-import { Search, MapPin, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState, type FormEvent } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface Props {
   onSearch: (location: string) => void;
@@ -10,7 +8,8 @@ interface Props {
 }
 
 const QUICK_LOCATIONS = [
-  'London', 'New York', 'Tokyo', 'Paris', 'Sydney', 'Dubai', 'Berlin', 'São Paulo',
+  'London', 'New York', 'Tokyo', 'Paris', 'Sydney',
+  'Dubai', 'Berlin', 'São Paulo', 'Cairo', 'Mumbai',
 ];
 
 export function SearchBar({ onSearch, loading = false, initialValue = '' }: Props) {
@@ -22,56 +21,48 @@ export function SearchBar({ onSearch, loading = false, initialValue = '' }: Prop
     if (trimmed) onSearch(trimmed);
   };
 
-  const handleKey = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const trimmed = value.trim();
-      if (trimmed) onSearch(trimmed);
-    }
-  };
-
   return (
-    <div className="w-full space-y-3">
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <div className="relative flex-1">
-          <MapPin
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none"
-          />
-          <Input
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder="Enter city, zip code, or coordinates…"
-            className="pl-9 bg-white/15 border-white/25 text-white placeholder:text-white/40 focus:bg-white/20 focus:border-white/50 focus-visible:ring-white/30 h-11 text-base"
-            disabled={loading}
-            aria-label="Location search"
-          />
-        </div>
-        <Button
+    <div className="space-y-2">
+      {/* Terminal-style prompt line */}
+      <form onSubmit={handleSubmit} className="flex items-center gap-0">
+        {/* Prompt symbol */}
+        <span className="text-ansi-green font-bold shrink-0 pr-2 select-none text-base">
+          $&gt;
+        </span>
+        <span className="text-ansi-dim shrink-0 pr-1 select-none text-base">wttr</span>
+        <span className="text-ansi-dim shrink-0 pr-2 select-none text-base">/</span>
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="city, zip, or lat,lon…"
+          className="flex-1 bg-transparent border-none outline-none text-ansi-white font-mono text-base placeholder:text-ansi-dim caret-[var(--ansi-green)] min-w-0"
+          disabled={loading}
+          aria-label="Location search"
+          autoComplete="off"
+          spellCheck={false}
+        />
+        <button
           type="submit"
           disabled={loading || !value.trim()}
-          className="bg-white/20 hover:bg-white/30 text-white border border-white/25 h-11 px-4 backdrop-blur-sm transition-all"
+          className="shrink-0 ml-2 text-ansi-green hover:text-ansi-cyan disabled:text-ansi-dim transition-colors font-mono text-sm px-2 py-0.5 border border-current hover:border-ansi-cyan disabled:border-ansi-dim"
+          aria-label="Search"
         >
-          {loading ? (
-            <Loader2 size={18} className="animate-spin" />
-          ) : (
-            <Search size={18} />
-          )}
-          <span className="ml-2 hidden sm:inline">Search</span>
-        </Button>
+          {loading
+            ? <Loader2 size={13} className="animate-spin inline" />
+            : '[ENTER]'
+          }
+        </button>
       </form>
 
-      {/* Quick-pick chips */}
-      <div className="flex flex-wrap gap-2">
+      {/* Quick-pick row */}
+      <div className="flex flex-wrap gap-x-3 gap-y-1 pl-8">
+        <span className="text-ansi-dim text-xs">quick:</span>
         {QUICK_LOCATIONS.map((loc) => (
           <button
             key={loc}
             type="button"
-            onClick={() => {
-              setValue(loc);
-              onSearch(loc);
-            }}
-            className="text-xs px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition-all cursor-pointer"
+            onClick={() => { setValue(loc); onSearch(loc); }}
+            className="text-xs text-ansi-cyan hover:text-ansi-green transition-colors cursor-pointer font-mono underline underline-offset-2"
           >
             {loc}
           </button>

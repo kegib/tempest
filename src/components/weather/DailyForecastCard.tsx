@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { ChevronDown, Sunrise, Sunset, Zap } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { WeatherIcon } from './WeatherIcon';
 import { HourlyForecastRow } from './HourlyForecastRow';
 import { formatDayShort } from '@/lib/weatherApi';
@@ -22,59 +20,55 @@ export function DailyForecastCard({ day, index, useFahrenheit = false, defaultOp
 
   const maxTemp = useFahrenheit ? `${toF(day.maxTempC)}°F` : `${day.maxTempC}°C`;
   const minTemp = useFahrenheit ? `${toF(day.minTempC)}°F` : `${day.minTempC}°C`;
+  const avgTemp = useFahrenheit ? `${toF(day.avgTempC)}°F` : `${day.avgTempC}°C`;
+
+  const dayLabel = index === 0 ? 'Today' : index === 1 ? 'Tomorrow' : formatDayShort(day.date);
 
   return (
-    <Card
-      className="border-0 shadow-lg overflow-hidden bg-white/10 backdrop-blur-md text-white cursor-pointer"
-      onClick={() => setOpen((v) => !v)}
-    >
-      <CardContent className="p-0">
-        {/* Summary row */}
-        <div className="flex items-center gap-3 p-4">
-          <div className="shrink-0 w-8 text-center text-white/50 text-sm font-medium">
-            {index === 0 ? 'Now' : `+${index}d`}
-          </div>
-          <WeatherIcon code={day.weatherCode} size="sm" />
-          <div className="flex-1 min-w-0">
-            <div className="font-semibold text-sm">{formatDayShort(day.date)}</div>
-            <div className="text-white/70 text-xs truncate">{day.description}</div>
-          </div>
-          <div className="flex items-baseline gap-1 shrink-0">
-            <span className="font-bold text-sm">{maxTemp}</span>
-            <span className="text-white/50 text-xs">/ {minTemp}</span>
-          </div>
-          <ChevronDown
-            size={16}
-            className={`shrink-0 text-white/50 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          />
-        </div>
+    <div className="font-mono text-sm">
+      {/* Separator / header line */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full text-left flex items-center gap-0 text-ansi-dim hover:text-ansi-green transition-colors group"
+      >
+        <span className="mr-1">{open ? '▼' : '▶'}</span>
+        <span className="text-ansi-green group-hover:crt-glow mr-2">{dayLabel}</span>
+        <span className="text-ansi-dim mr-2">{day.date}</span>
+        <span className="flex-1 border-t border-dashed border-[var(--ansi-dim)]" />
+        <WeatherIcon code={day.weatherCode} size="sm" className="mx-2" />
+        <span className="text-ansi-yellow mr-1">{maxTemp}</span>
+        <span className="text-ansi-dim">/</span>
+        <span className="text-ansi-dim ml-1">{minTemp}</span>
+        <span className="text-ansi-dim ml-3 text-xs">avg {avgTemp}</span>
+      </button>
 
-        {/* Expanded detail */}
-        {open && (
-          <div
-            className="border-t border-white/10 px-4 pb-4 pt-3 space-y-3"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Astronomy row */}
-            <div className="flex gap-4 text-sm text-white/80">
-              <span className="flex items-center gap-1">
-                <Sunrise size={14} className="text-amber-300" />
-                {day.sunrise}
-              </span>
-              <span className="flex items-center gap-1">
-                <Sunset size={14} className="text-orange-300" />
-                {day.sunset}
-              </span>
-              <span className="flex items-center gap-1">
-                <Zap size={14} className="text-yellow-300" />
-                UV {day.uvIndex}
-              </span>
-            </div>
-            {/* Hourly strip */}
+      {open && (
+        <div className="mt-1 ml-3 space-y-1 border-l border-[var(--ansi-dim)] pl-3">
+          {/* Astronomy line */}
+          <div className="flex flex-wrap gap-x-4 gap-y-0 text-xs text-ansi-dim">
+            <span>
+              <span className="text-ansi-yellow">☀</span> rise{' '}
+              <span className="text-ansi-white">{day.sunrise}</span>
+            </span>
+            <span>
+              <span className="text-ansi-yellow">☽</span> set{' '}
+              <span className="text-ansi-white">{day.sunset}</span>
+            </span>
+            <span>
+              UV <span className="text-ansi-yellow">{day.uvIndex}</span>
+            </span>
+            <span>
+              <span className="text-ansi-white">{day.description}</span>
+            </span>
+          </div>
+
+          {/* Hourly grid */}
+          <div className="mt-2 overflow-x-auto">
             <HourlyForecastRow hourly={day.hourly} useFahrenheit={useFahrenheit} />
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 }

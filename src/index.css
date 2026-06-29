@@ -83,97 +83,67 @@
   }
 }
 
+/* ── Terminal / console theme (always dark) ── */
 :root {
-  --radius: 0.75rem;
+  --radius: 0.125rem; /* almost square corners, like a terminal */
 
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(222.2 84% 4.9%);
+  /* True terminal black background */
+  --background: hsl(0 0% 7%);
+  --foreground: hsl(120 100% 75%); /* classic green-phosphor */
 
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(222.2 84% 4.9%);
+  --card: hsl(0 0% 10%);
+  --card-foreground: hsl(120 100% 75%);
 
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(222.2 84% 4.9%);
+  --popover: hsl(0 0% 10%);
+  --popover-foreground: hsl(120 100% 75%);
 
-  --primary: hsl(222.2 47.4% 11.2%);
-  --primary-foreground: hsl(210 40% 98%);
+  /* Primary = bright white/cyan for highlights */
+  --primary: hsl(180 100% 70%);
+  --primary-foreground: hsl(0 0% 5%);
 
-  --secondary: hsl(210 40% 96.1%);
-  --secondary-foreground: hsl(222.2 47.4% 11.2%);
+  --secondary: hsl(0 0% 14%);
+  --secondary-foreground: hsl(120 60% 65%);
 
-  --muted: hsl(210 40% 96.1%);
-  --muted-foreground: hsl(215.4 16.3% 46.9%);
+  --muted: hsl(0 0% 14%);
+  --muted-foreground: hsl(120 30% 45%);
 
-  --accent: hsl(210 40% 96.1%);
-  --accent-foreground: hsl(222.2 47.4% 11.2%);
+  --accent: hsl(0 0% 18%);
+  --accent-foreground: hsl(60 100% 70%); /* yellow accent */
 
-  --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0 80% 55%);
+  --destructive-foreground: hsl(0 0% 98%);
 
-  --border: hsl(214.3 31.8% 91.4%);
-  --input: hsl(214.3 31.8% 91.4%);
-  --ring: hsl(222.2 84% 4.9%);
+  --border: hsl(120 30% 22%);
+  --input: hsl(0 0% 12%);
+  --ring: hsl(120 100% 50%);
 
-  --chart-1: hsl(12 76% 61%);
-  --chart-2: hsl(173 58% 39%);
-  --chart-3: hsl(197 37% 24%);
-  --chart-4: hsl(43 74% 66%);
-  --chart-5: hsl(27 87% 67%);
+  --chart-1: hsl(120 100% 65%);
+  --chart-2: hsl(180 100% 65%);
+  --chart-3: hsl(60 100% 65%);
+  --chart-4: hsl(30 100% 65%);
+  --chart-5: hsl(0 100% 65%);
 
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: hsl(0 0% 8%);
+  --sidebar-foreground: hsl(120 60% 65%);
+  --sidebar-primary: hsl(120 100% 70%);
+  --sidebar-primary-foreground: hsl(0 0% 5%);
+  --sidebar-accent: hsl(0 0% 14%);
+  --sidebar-accent-foreground: hsl(120 60% 65%);
+  --sidebar-border: hsl(120 20% 18%);
+  --sidebar-ring: hsl(120 100% 50%);
+
+  /* ANSI-style named colours for weather display */
+  --ansi-green: hsl(120 100% 65%);
+  --ansi-cyan: hsl(180 100% 65%);
+  --ansi-yellow: hsl(60 100% 70%);
+  --ansi-blue: hsl(210 100% 70%);
+  --ansi-red: hsl(0 100% 65%);
+  --ansi-white: hsl(0 0% 90%);
+  --ansi-dim: hsl(120 20% 38%);
+  --ansi-bright-green: hsl(120 100% 75%);
 }
 
-.dark {
-  --background: hsl(222.2 84% 4.9%);
-  --foreground: hsl(210 40% 98%);
-
-  --card: hsl(222.2 84% 4.9%);
-  --card-foreground: hsl(210 40% 98%);
-
-  --popover: hsl(222.2 84% 4.9%);
-  --popover-foreground: hsl(210 40% 98%);
-
-  --primary: hsl(210 40% 98%);
-  --primary-foreground: hsl(222.2 47.4% 11.2%);
-
-  --secondary: hsl(217.2 32.6% 17.5%);
-  --secondary-foreground: hsl(210 40% 98%);
-
-  --muted: hsl(217.2 32.6% 17.5%);
-  --muted-foreground: hsl(215 20.2% 65.1%);
-
-  --accent: hsl(217.2 32.6% 17.5%);
-  --accent-foreground: hsl(210 40% 98%);
-
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(210 40% 98%);
-
-  --border: hsl(217.2 32.6% 17.5%);
-  --input: hsl(217.2 32.6% 17.5%);
-  --ring: hsl(212.7 26.8% 83.9%);
-
-  --chart-1: hsl(220 70% 50%);
-  --chart-2: hsl(160 60% 45%);
-  --chart-3: hsl(30 80% 55%);
-  --chart-4: hsl(280 65% 60%);
-  --chart-5: hsl(340 75% 55%);
-
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
-}
+/* No separate .dark block — the app is always terminal-dark */
 
 @layer base {
   *,
@@ -184,9 +154,92 @@
     border-color: var(--color-border, currentcolor);
   }
 
+  html {
+    /* Force the terminal theme on the root so no white flash */
+    background-color: hsl(0 0% 7%);
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: 'Courier New', Courier, 'Lucida Console', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    /* Subtle scanline effect */
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
   }
+
+  /* Selection colour — ANSI-style inverse */
+  ::selection {
+    background-color: hsl(120 100% 65%);
+    color: hsl(0 0% 5%);
+  }
+
+  /* Scrollbars — thin and terminal-coloured */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: hsl(0 0% 10%); }
+  ::-webkit-scrollbar-thumb { background: hsl(120 30% 22%); border-radius: 0; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(120 50% 35%); }
+  * { scrollbar-width: thin; scrollbar-color: hsl(120 30% 22%) hsl(0 0% 10%); }
+}
+
+/* ── Terminal utility classes ── */
+
+/* Box-drawing border sets */
+.term-box {
+  border: 1px solid var(--ansi-dim);
+  border-radius: 0;
+}
+.term-box-bright {
+  border: 1px solid var(--ansi-green);
+  border-radius: 0;
+}
+
+/* ANSI colour helpers */
+.text-ansi-green   { color: var(--ansi-green); }
+.text-ansi-cyan    { color: var(--ansi-cyan); }
+.text-ansi-yellow  { color: var(--ansi-yellow); }
+.text-ansi-blue    { color: var(--ansi-blue); }
+.text-ansi-red     { color: var(--ansi-red); }
+.text-ansi-white   { color: var(--ansi-white); }
+.text-ansi-dim     { color: var(--ansi-dim); }
+
+/* Blinking cursor */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.cursor-blink::after {
+  content: '█';
+  animation: blink 1s step-end infinite;
+  color: var(--ansi-green);
+  margin-left: 1px;
+}
+
+/* CRT glow on bright text */
+.crt-glow {
+  text-shadow:
+    0 0 4px currentColor,
+    0 0 8px currentColor;
+}
+
+/* Thin scrollbar for hourly strip */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  height: 4px;
+}
+.scrollbar-thumb-green\/20::-webkit-scrollbar-thumb {
+  background-color: hsl(120 30% 22%);
+}
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 /* Thin scrollbar for hourly forecast strip */

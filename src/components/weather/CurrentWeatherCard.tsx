@@ -1,5 +1,3 @@
-import { Droplets, Wind, Eye, Thermometer, Cloud, Gauge, Sun } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { WeatherIcon } from './WeatherIcon';
 import { windDescription, uvDescription } from '@/lib/weatherApi';
 import type { CurrentWeather, LocationInfo } from '@/lib/weatherTypes';
@@ -10,21 +8,27 @@ interface Props {
   useFahrenheit?: boolean;
 }
 
-interface StatProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
+// Render a single row in the stats table
+function Row({ label, value, colour = 'text-ansi-white' }: { label: string; value: string; colour?: string }) {
+  return (
+    <div className="flex gap-0">
+      <span className="text-ansi-dim w-24 shrink-0">{label}</span>
+      <span className={`text-ansi-dim mr-1`}>:</span>
+      <span className={colour}>{value}</span>
+    </div>
+  );
 }
 
-function StatBadge({ icon, label, value }: StatProps) {
+// Horizontal bar for a percentage value (0–100)
+function Bar({ value, max = 100, colour = 'text-ansi-green' }: { value: number; max?: number; colour?: string }) {
+  const filled = Math.round((value / max) * 20);
+  const empty = 20 - filled;
   return (
-    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
-      <span className="text-white/70 shrink-0">{icon}</span>
-      <div className="min-w-0">
-        <div className="text-white/60 text-xs leading-tight">{label}</div>
-        <div className="text-white text-sm font-medium leading-tight truncate">{value}</div>
-      </div>
-    </div>
+    <span className={`${colour} font-mono`}>
+      {'█'.repeat(filled)}
+      <span className="text-ansi-dim">{'░'.repeat(empty)}</span>
+      <span className="text-ansi-dim ml-1">{value}%</span>
+    </span>
   );
 }
 
@@ -34,63 +38,65 @@ export function CurrentWeatherCard({ current, location, useFahrenheit = false }:
   const locStr = [location.city, location.region, location.country].filter(Boolean).join(', ');
 
   return (
-    <Card className="border-0 shadow-2xl overflow-hidden bg-transparent">
-      <CardContent className="p-0">
-        {/* Main display */}
-        <div className="p-6 md:p-8 text-white">
-          <div className="flex items-start justify-between gap-4 mb-6">
-            <div className="min-w-0">
-              <h2 className="text-2xl md:text-3xl font-bold leading-tight mb-0.5 truncate">
-                {locStr}
-              </h2>
-              <p className="text-white/70 text-sm">{current.observationTime}</p>
+    <div className="font-mono text-sm space-y-0">
+      {/* ┌─ Title bar ─────────────────────────────────────────┐ */}
+      <div className="flex items-center text-ansi-dim">
+        <span>┌─</span>
+        <span className="text-ansi-white px-1">Weather report: {locStr}</span>
+        <span className="flex-1 border-t border-dashed border-[var(--ansi-dim)] mx-1" style={{ minWidth: '8px' }} />
+        <span>┐</span>
+      </div>
+
+      {/* │ Main content │ */}
+      <div className="flex border-l border-r border-[var(--ansi-dim)]">
+        <div className="flex-1 px-3 py-2 space-y-1">
+          {/* Big temperature + icon */}
+          <div className="flex items-start gap-4">
+            <div>
+              <div className="text-ansi-yellow crt-glow text-4xl font-bold leading-none mb-1">
+                {temp}
+              </div>
+              <div className="text-ansi-white text-base">{current.description}</div>
+              <div className="text-ansi-dim text-xs">Feels like {feelsLike}</div>
             </div>
-            <WeatherIcon code={current.weatherCode} size="xl" className="shrink-0" />
+            <WeatherIcon code={current.weatherCode} size="xl" className="mt-1 opacity-90" />
           </div>
 
-          <div className="flex items-end gap-4 mb-2">
-            <span className="text-7xl md:text-8xl font-thin leading-none tracking-tighter">
-              {temp}
-            </span>
-          </div>
-          <p className="text-xl text-white/90 mb-1">{current.description}</p>
-          <p className="text-white/60 text-sm">Feels like {feelsLike}</p>
-        </div>
+          <div className="border-t border-dashed border-[var(--ansi-dim)] my-2" />
 
-        {/* Stats grid */}
-        <div className="px-4 pb-4 md:px-6 md:pb-6 grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <StatBadge
-            icon={<Droplets size={16} />}
-            label="Humidity"
-            value={`${current.humidity}%`}
-          />
-          <StatBadge
-            icon={<Wind size={16} />}
-            label="Wind"
-            value={`${current.windspeedKmph} km/h ${current.winddir} · ${windDescription(current.windspeedKmph)}`}
-          />
-          <StatBadge
-            icon={<Eye size={16} />}
-            label="Visibility"
-            value={`${current.visibilityKm} km`}
-          />
-          <StatBadge
-            icon={<Cloud size={16} />}
-            label="Cloud Cover"
-            value={`${current.cloudcover}%`}
-          />
-          <StatBadge
-            icon={<Sun size={16} />}
-            label="UV Index"
-            value={`${current.uvIndex} · ${uvDescription(current.uvIndex)}`}
-          />
-          <StatBadge
-            icon={<Thermometer size={16} />}
-            label="Precipitation"
-            value={`${current.precipMM} mm`}
-          />
+          {/* Stats */}
+          <div className="space-y-0.5">
+            <Row label="Wind" value={`${current.windspeedKmph} km/h ${current.winddir}  ${windDescription(current.windspeedKmph)}`} colour="text-ansi-cyan" />
+            <Row label="Visibility" value={`${current.visibilityKm} km`} colour="text-ansi-white" />
+            <Row label="Pressure" value={`${current.precipMM > 0 ? current.precipMM + ' mm rain' : 'dry'}`} colour="text-ansi-blue" />
+            <Row label="UV index" value={`${current.uvIndex}  ${uvDescription(current.uvIndex)}`} colour="text-ansi-yellow" />
+            <Row label="Observed" value={current.observationTime} colour="text-ansi-dim" />
+          </div>
+
+          <div className="border-t border-dashed border-[var(--ansi-dim)] my-2" />
+
+          {/* Bar charts */}
+          <div className="space-y-1">
+            <div className="flex gap-2 items-center">
+              <span className="text-ansi-dim w-24 shrink-0">Humidity</span>
+              <span className="text-ansi-dim mr-1">:</span>
+              <Bar value={current.humidity} colour="text-ansi-blue" />
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="text-ansi-dim w-24 shrink-0">Cloud cover</span>
+              <span className="text-ansi-dim mr-1">:</span>
+              <Bar value={current.cloudcover} colour="text-ansi-dim" />
+            </div>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* └───────────────────────────────────────────────────┘ */}
+      <div className="flex items-center text-ansi-dim">
+        <span>└</span>
+        <span className="flex-1 border-t border-dashed border-[var(--ansi-dim)]" style={{ minWidth: '8px' }} />
+        <span>┘</span>
+      </div>
+    </div>
   );
 }

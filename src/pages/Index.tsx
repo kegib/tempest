@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSeoMeta } from '@unhead/react';
-import { AlertCircle, RefreshCw, CloudSun } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import { SearchBar } from '@/components/weather/SearchBar';
 import { CurrentWeatherCard } from '@/components/weather/CurrentWeatherCard';
 import { DailyForecastCard } from '@/components/weather/DailyForecastCard';
@@ -9,7 +8,6 @@ import { ForecastTextBox } from '@/components/weather/ForecastTextBox';
 import { WeatherSkeleton } from '@/components/weather/WeatherSkeleton';
 import { TemperatureToggle } from '@/components/weather/TemperatureToggle';
 import { useWeather } from '@/hooks/useWeather';
-import { weatherGradient } from '@/lib/weatherApi';
 
 const DEFAULT_LOCATION = 'London';
 
@@ -20,18 +18,17 @@ export default function Index() {
 
   const { data, isLoading, isError, error, refetch, isFetching } = useWeather(location);
 
-  // Update page title when data changes
   useSeoMeta({
     title: data
       ? `${data.location.city} – ${data.current.tempC}°C, ${data.current.description} | Tempest`
-      : 'Tempest – Beautiful Weather Forecasts',
+      : 'Tempest – Terminal Weather Forecasts',
     description:
-      'Real-time weather forecasts powered by wttr.in. Search any city for current conditions and a 3-day outlook.',
+      'Terminal-style weather forecasts powered by wttr.in. Search any city for current conditions and a 3-day outlook.',
     ogTitle: 'Tempest',
-    ogDescription: 'Beautiful weather forecasts for any location on Earth.',
+    ogDescription: 'Console-oriented weather forecasts inspired by wttr.in and wego.',
   });
 
-  // Use geolocation to pre-fill on first load (best-effort)
+  // Geolocation pre-fill (best-effort)
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -39,172 +36,202 @@ export default function Index() {
         const { latitude, longitude } = pos.coords;
         setLocation(`${latitude.toFixed(4)},${longitude.toFixed(4)}`);
       },
-      () => {
-        // ignore – fall back to default
-      },
+      () => { /* ignore – fall back to default */ },
       { timeout: 5000 },
     );
   }, []);
 
-  const gradient = data
-    ? weatherGradient(data.current.weatherCode)
-    : 'from-sky-500 via-blue-400 to-indigo-500';
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dateStr = now.toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
 
   return (
-    <div
-      className={`min-h-screen bg-gradient-to-br ${gradient} transition-all duration-700`}
-    >
-      {/* Subtle animated background circles */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
-        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-white/5 blur-3xl animate-pulse" />
-        <div className="absolute top-1/3 -left-32 w-72 h-72 rounded-full bg-white/5 blur-2xl animate-pulse [animation-delay:2s]" />
-        <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full bg-white/5 blur-2xl animate-pulse [animation-delay:4s]" />
-      </div>
+    <div className="min-h-screen bg-background text-foreground font-mono">
+      {/* ── Terminal window chrome ── */}
+      <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 space-y-0">
 
-      <div className="relative z-10 max-w-2xl mx-auto px-4 py-8 md:py-12 space-y-6">
-        {/* Header */}
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-white">
-            <CloudSun size={28} className="shrink-0" />
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold leading-tight">Tempest</h1>
-              <p className="text-white/60 text-xs hidden sm:block">
-                Powered by wttr.in · wego-style
-              </p>
+        {/* Window title bar */}
+        <div className="flex items-center gap-0 text-ansi-dim text-xs border-b border-[var(--ansi-dim)] pb-1 mb-0">
+          <span className="text-ansi-green mr-2">●</span>
+          <span className="flex-1 text-ansi-dim">tempest v1.0.0  —  bash  —  80×24</span>
+          <span className="text-ansi-dim">{dateStr}  {timeStr}</span>
+        </div>
+
+        {/* Main terminal box */}
+        <div className="border border-[var(--ansi-dim)]">
+
+          {/* Header / banner */}
+          <div className="border-b border-[var(--ansi-dim)] px-3 py-3 space-y-1">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-ansi-green crt-glow text-lg font-bold leading-tight">
+                  ⚡ TEMPEST
+                </div>
+                <div className="text-ansi-dim text-xs">
+                  console-oriented weather forecast — powered by wttr.in
+                </div>
+              </div>
+              <div className="flex items-center gap-4 shrink-0">
+                <TemperatureToggle useFahrenheit={useFahrenheit} onChange={setUseFahrenheit} />
+                {(isFetching && data) && (
+                  <span className="text-ansi-dim text-xs flex items-center gap-1">
+                    <Loader2 size={11} className="animate-spin" /> refreshing…
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <TemperatureToggle useFahrenheit={useFahrenheit} onChange={setUseFahrenheit} />
-            {data && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => refetch()}
-                disabled={isFetching}
-                className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
-                aria-label="Refresh forecast"
-              >
-                <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
-              </Button>
-            )}
-          </div>
-        </header>
 
-        {/* Search */}
-        <SearchBar
-          onSearch={setLocation}
-          loading={isLoading || isFetching}
-          initialValue={location !== DEFAULT_LOCATION ? location : ''}
-        />
-
-        {/* Error state */}
-        {isError && !isLoading && (
-          <div className="bg-red-500/20 border border-red-400/30 backdrop-blur-sm rounded-xl p-4 flex items-start gap-3 text-white">
-            <AlertCircle size={18} className="shrink-0 mt-0.5 text-red-300" />
-            <div className="space-y-1">
-              <p className="font-semibold text-sm">Couldn't load weather data</p>
-              <p className="text-white/70 text-xs">
-                {error instanceof Error ? error.message : 'Unknown error. Try a different location.'}
-              </p>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => refetch()}
-                className="text-white/70 hover:text-white mt-1 h-7 px-2"
-              >
-                <RefreshCw size={12} className="mr-1" /> Retry
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Loading skeleton */}
-        {(isLoading || (isFetching && !data)) && <WeatherSkeleton />}
-
-        {/* Weather data */}
-        {data && !isLoading && (
-          <div className="space-y-4">
-            {/* Current conditions */}
-            <CurrentWeatherCard
-              current={data.current}
-              location={data.location}
-              useFahrenheit={useFahrenheit}
+          {/* Search bar */}
+          <div className="border-b border-[var(--ansi-dim)] px-3 py-3">
+            <SearchBar
+              onSearch={setLocation}
+              loading={isLoading || isFetching}
+              initialValue={location !== DEFAULT_LOCATION ? location : ''}
             />
+          </div>
 
-            {/* Section label */}
-            <h2 className="text-white/80 text-sm font-semibold uppercase tracking-widest px-1">
-              3-Day Forecast
-            </h2>
+          {/* Main content area */}
+          <div className="px-3 py-3 space-y-4 min-h-48">
 
-            {/* Daily cards */}
-            <div className="space-y-2">
-              {data.forecast.map((day, i) => (
-                <DailyForecastCard
-                  key={day.date}
-                  day={day}
-                  index={i}
+            {/* Error state */}
+            {isError && !isLoading && (
+              <div className="font-mono text-sm space-y-1">
+                <div className="flex text-ansi-red">
+                  <span>┌─</span>
+                  <span className="px-1">ERROR</span>
+                  <span className="flex-1 border-t border-dashed border-[var(--ansi-red)]" style={{ minWidth: '8px' }} />
+                  <span>┐</span>
+                </div>
+                <div className="border-l border-r border-[var(--ansi-red)] px-3 py-2 space-y-1">
+                  <div className="text-ansi-red">✗ Failed to fetch weather data</div>
+                  <div className="text-ansi-dim text-xs">
+                    {error instanceof Error ? error.message : 'Unknown error. Check the location and try again.'}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => refetch()}
+                    className="text-ansi-cyan hover:text-ansi-green text-xs mt-1 transition-colors"
+                  >
+                    [RETRY]
+                  </button>
+                </div>
+                <div className="flex text-ansi-red">
+                  <span>└</span>
+                  <span className="flex-1 border-t border-dashed border-[var(--ansi-red)]" style={{ minWidth: '8px' }} />
+                  <span>┘</span>
+                </div>
+              </div>
+            )}
+
+            {/* Loading */}
+            {(isLoading || (isFetching && !data)) && <WeatherSkeleton />}
+
+            {/* Weather data */}
+            {data && !isLoading && (
+              <div className="space-y-4">
+
+                {/* Current conditions */}
+                <CurrentWeatherCard
+                  current={data.current}
+                  location={data.location}
                   useFahrenheit={useFahrenheit}
-                  defaultOpen={i === 0}
                 />
-              ))}
-            </div>
 
-            {/* wttr-style text summary */}
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowText((v) => !v)}
-                className="text-white/60 hover:text-white text-xs flex items-center gap-1 mb-2 transition-colors"
-              >
-                <span>{showText ? '▼' : '▶'}</span> wego / wttr-style text output
-              </button>
-              {showText && <ForecastTextBox data={data} />}
-            </div>
+                {/* 3-day section header */}
+                <div className="flex items-center gap-2 text-ansi-dim text-xs pt-1">
+                  <span>──</span>
+                  <span className="text-ansi-cyan">3-DAY FORECAST</span>
+                  <span className="flex-1 border-t border-dashed border-[var(--ansi-dim)]" style={{ minWidth: '8px' }} />
+                </div>
+
+                {/* Daily rows */}
+                <div className="space-y-3">
+                  {data.forecast.map((day, i) => (
+                    <DailyForecastCard
+                      key={day.date}
+                      day={day}
+                      index={i}
+                      useFahrenheit={useFahrenheit}
+                      defaultOpen={i === 0}
+                    />
+                  ))}
+                </div>
+
+                {/* wttr-style text section */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowText((v) => !v)}
+                    className="text-ansi-dim hover:text-ansi-green text-xs flex items-center gap-1 transition-colors mb-1"
+                  >
+                    <span>{showText ? '▼' : '▶'}</span>
+                    <span>curl-friendly plain-text output</span>
+                  </button>
+                  {showText && <ForecastTextBox data={data} />}
+                </div>
+
+              </div>
+            )}
+
+            {/* Empty / initial state */}
+            {!data && !isLoading && !isError && (
+              <div className="text-ansi-dim text-sm py-8 text-center space-y-1">
+                <div className="text-2xl">⚡</div>
+                <div className="cursor-blink">Enter a location to begin</div>
+              </div>
+            )}
+
           </div>
-        )}
 
-        {/* Empty/initial state */}
-        {!data && !isLoading && !isError && (
-          <div className="text-center py-16 text-white/60">
-            <CloudSun size={48} className="mx-auto mb-4 text-white/30" />
-            <p className="text-lg">Search for a city to see the forecast</p>
-          </div>
-        )}
-
-        {/* Footer */}
-        <footer className="text-center text-white/40 text-xs pt-4 border-t border-white/10 space-y-1">
-          <p>
-            Data from{' '}
+          {/* Status bar */}
+          <div className="border-t border-[var(--ansi-dim)] px-3 py-1 flex items-center gap-4 text-xs text-ansi-dim">
+            {data && (
+              <>
+                <span className="text-ansi-green">●</span>
+                <span>
+                  {data.location.city}
+                  {data.location.country ? `, ${data.location.country}` : ''}
+                </span>
+                <span>│</span>
+                <span>lat {data.location.lat.toFixed(3)}  lon {data.location.lon.toFixed(3)}</span>
+                <span>│</span>
+                <span>cache: {data ? 'HIT' : 'MISS'}</span>
+              </>
+            )}
+            {!data && <span>no data loaded</span>}
+            <span className="flex-1" />
             <a
               href="https://wttr.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-white/70 transition-colors"
+              className="text-ansi-dim hover:text-ansi-cyan transition-colors underline underline-offset-2"
             >
               wttr.in
-            </a>{' '}
-            · inspired by{' '}
+            </a>
+            <span>·</span>
             <a
               href="https://github.com/chubin/wego"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-white/70 transition-colors"
+              className="text-ansi-dim hover:text-ansi-cyan transition-colors underline underline-offset-2"
             >
               wego
             </a>
-          </p>
-          <p>
-            Vibed with{' '}
+            <span>·</span>
             <a
               href="https://shakespeare.diy"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-white/70 transition-colors"
+              className="text-ansi-dim hover:text-ansi-cyan transition-colors underline underline-offset-2"
             >
-              Shakespeare
+              shakespeare
             </a>
-          </p>
-        </footer>
+          </div>
+
+        </div>
+        {/* end main terminal box */}
+
       </div>
     </div>
   );

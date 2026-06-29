@@ -7,37 +7,94 @@ interface Props {
   useFahrenheit?: boolean;
 }
 
-interface HourCellProps {
-  hour: HourlyForecast;
-  useFahrenheit: boolean;
+function toF(c: number) {
+  return Math.round((c * 9) / 5 + 32);
 }
 
-function HourCell({ hour, useFahrenheit }: HourCellProps) {
-  const temp = useFahrenheit
-    ? `${Math.round((hour.tempC * 9) / 5 + 32)}°F`
-    : `${hour.tempC}°C`;
-
-  return (
-    <div className="flex flex-col items-center gap-1 min-w-[72px] px-3 py-3 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-default">
-      <span className="text-white/70 text-xs font-medium">{formatHour(hour.time)}</span>
-      <WeatherIcon code={hour.weatherCode} size="sm" />
-      <span className="text-white font-semibold text-sm">{temp}</span>
-      {hour.chanceOfRain > 20 && (
-        <span className="text-sky-200 text-xs">💧 {hour.chanceOfRain}%</span>
-      )}
-    </div>
-  );
+// Simple sparkline character based on value relative to min/max range
+function tempChar(temp: number, min: number, max: number): string {
+  const range = max - min || 1;
+  const ratio = (temp - min) / range;
+  if (ratio < 0.2) return '▁';
+  if (ratio < 0.4) return '▃';
+  if (ratio < 0.6) return '▅';
+  if (ratio < 0.8) return '▆';
+  return '▇';
 }
 
 export function HourlyForecastRow({ hourly, useFahrenheit = false }: Props) {
-  // Filter to reasonable hours (every 3 hours)
-  const filtered = hourly.filter((_, i) => i % 1 === 0);
+  const temps = hourly.map((h) => h.tempC);
+  const minT = Math.min(...temps);
+  const maxT = Math.max(...temps);
 
   return (
-    <div className="relative">
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-        {filtered.map((h) => (
-          <HourCell key={h.time} hour={h} useFahrenheit={useFahrenheit} />
+    <div className="font-mono text-xs overflow-x-auto scrollbar-thin">
+      {/* Time row */}
+      <div className="flex min-w-max">
+        <span className="text-ansi-dim w-16 shrink-0">Time</span>
+        {hourly.map((h) => (
+          <span key={h.time} className="w-10 text-center text-ansi-dim shrink-0">
+            {formatHour(h.time)}
+          </span>
+        ))}
+      </div>
+
+      {/* Icon row */}
+      <div className="flex min-w-max">
+        <span className="text-ansi-dim w-16 shrink-0">Weather</span>
+        {hourly.map((h) => (
+          <span key={h.time} className="w-10 text-center shrink-0 text-base leading-none">
+            <WeatherIcon code={h.weatherCode} size="sm" />
+          </span>
+        ))}
+      </div>
+
+      {/* Temp row */}
+      <div className="flex min-w-max">
+        <span className="text-ansi-dim w-16 shrink-0">Temp</span>
+        {hourly.map((h) => {
+          const t = useFahrenheit ? toF(h.tempC) : h.tempC;
+          const unit = useFahrenheit ? 'F' : 'C';
+          return (
+            <span key={h.time} className="w-10 text-center text-ansi-yellow shrink-0">
+              {t}°{unit}
+            </span>
+          );
+        })}
+      </div>
+
+      {/* Sparkline row */}
+      <div className="flex min-w-max">
+        <span className="text-ansi-dim w-16 shrink-0">Graph</span>
+        {hourly.map((h) => (
+          <span key={h.time} className="w-10 text-center text-ansi-green shrink-0 crt-glow">
+            {tempChar(h.tempC, minT, maxT)}
+          </span>
+        ))}
+      </div>
+
+      {/* Rain chance row – only show if any hour has >5% */}
+      {hourly.some((h) => h.chanceOfRain > 5) && (
+        <div className="flex min-w-max">
+          <span className="text-ansi-dim w-16 shrink-0">Rain%</span>
+          {hourly.map((h) => (
+            <span
+              key={h.time}
+              className={`w-10 text-center shrink-0 ${h.chanceOfRain > 50 ? 'text-ansi-blue' : h.chanceOfRain > 20 ? 'text-ansi-cyan' : 'text-ansi-dim'}`}
+            >
+              {h.chanceOfRain > 5 ? `${h.chanceOfRain}%` : '-'}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Wind row */}
+      <div className="flex min-w-max">
+        <span className="text-ansi-dim w-16 shrink-0">Wind</span>
+        {hourly.map((h) => (
+          <span key={h.time} className="w-10 text-center text-ansi-cyan shrink-0">
+            {h.windspeedKmph}
+          </span>
         ))}
       </div>
     </div>
