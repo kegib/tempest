@@ -1,4 +1,4 @@
-# ⚡ Tempest
+# ⚡ tmpst
 
 > A console-oriented weather forecast web app inspired by [wttr.in](https://wttr.in) and [wego](https://github.com/chubin/wego).
 
@@ -8,10 +8,10 @@
 
 ## What it is
 
-Tempest is a terminal-aesthetic weather forecast app that runs entirely in the browser. It fetches real-time weather data from the [wttr.in](https://wttr.in) JSON API and presents it in a style that feels like running `curl wttr.in` — dark background, phosphor-green monospace text, box-drawing borders, Unicode sparklines, and ANSI-inspired colours.
+tmpst is a terminal-aesthetic weather forecast app that runs entirely in the browser. It fetches real-time weather data from the [wttr.in](https://wttr.in) JSON API and presents it in a style that feels like running `curl wttr.in` — dark background, phosphor-green monospace text, box-drawing borders, Unicode sparklines, and ANSI-inspired colours.
 
 ```
-⚡ TEMPEST  —  console-oriented weather forecast — powered by wttr.in
+⚡ TMPST  —  console-oriented weather forecast — powered by wttr.in
 
 $> wttr / London                                          [ENTER]
 
@@ -127,7 +127,7 @@ All weather data comes from **[wttr.in](https://wttr.in)** via its public JSON A
 https://wttr.in/{location}?format=j1
 ```
 
-wttr.in is open-source ([Apache 2.0](https://github.com/chubin/wttr.in/blob/master/LICENSE)) and free to use. Tempest caches responses for 10 minutes to be a polite consumer of the service. For high-traffic deployments, consider self-hosting wttr.in or proxying through a backend with more aggressive caching.
+wttr.in is open-source ([Apache 2.0](https://github.com/chubin/wttr.in/blob/master/LICENSE)) and free to use. tmpst caches responses for 10 minutes to be a polite consumer of the service. For high-traffic deployments, consider self-hosting wttr.in or proxying through a backend with more aggressive caching.
 
 ---
 

@@ -20,11 +20,11 @@ export default function Index() {
 
   useSeoMeta({
     title: data
-      ? `${data.location.city} – ${data.current.tempC}°C, ${data.current.description} | Tempest`
-      : 'Tempest – Terminal Weather Forecasts',
+      ? `${data.location.city} – ${data.current.tempC}°C, ${data.current.description} | tmpst`
+      : 'tmpst – Terminal Weather Forecasts',
     description:
       'Terminal-style weather forecasts powered by wttr.in. Search any city for current conditions and a 3-day outlook.',
-    ogTitle: 'Tempest',
+    ogTitle: 'tmpst',
     ogDescription: 'Console-oriented weather forecasts inspired by wttr.in and wego.',
   });
 
@@ -53,7 +53,7 @@ export default function Index() {
         {/* Window title bar */}
         <div className="flex items-center gap-0 text-ansi-dim text-xs border-b border-[var(--ansi-dim)] pb-1 mb-0">
           <span className="text-ansi-green mr-2">●</span>
-          <span className="flex-1 text-ansi-dim">tempest v1.0.0  —  bash  —  80×24</span>
+          <span className="flex-1 text-ansi-dim">tmpst v1.0.0  —  bash  —  80×24</span>
           <span className="text-ansi-dim">{dateStr}  {timeStr}</span>
         </div>
 
@@ -65,7 +65,7 @@ export default function Index() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-ansi-green crt-glow text-lg font-bold leading-tight">
-                  ⚡ TEMPEST
+                  ⚡ TMPST
                 </div>
                 <div className="text-ansi-dim text-xs">
                   console-oriented weather forecast — powered by wttr.in
