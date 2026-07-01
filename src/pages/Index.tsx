@@ -7,6 +7,7 @@ import { DailyForecastCard } from '@/components/weather/DailyForecastCard';
 import { ForecastTextBox } from '@/components/weather/ForecastTextBox';
 import { WeatherSkeleton } from '@/components/weather/WeatherSkeleton';
 import { TemperatureToggle } from '@/components/weather/TemperatureToggle';
+import { RadarPanel } from '@/components/weather/RadarPanel';
 import { useWeather } from '@/hooks/useWeather';
 
 const DEFAULT_LOCATION = 'London';
@@ -157,6 +158,9 @@ export default function Index() {
                     />
                   ))}
                 </div>
+
+                {/* Radar section */}
+                <RadarPanel location={location} zoom={6} />
 
                 {/* wttr-style text section */}
                 <div>
