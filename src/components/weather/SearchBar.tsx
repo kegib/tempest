@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react';
-import { Loader2 } from 'lucide-react';
 
 interface Props {
   onSearch: (location: string) => void;
@@ -47,10 +46,7 @@ export function SearchBar({ onSearch, loading = false, initialValue = '' }: Prop
           className="shrink-0 ml-2 text-ansi-green hover:text-ansi-cyan disabled:text-ansi-dim transition-colors font-mono text-sm px-2 py-0.5 border border-current hover:border-ansi-cyan disabled:border-ansi-dim"
           aria-label="Search"
         >
-          {loading
-            ? <Loader2 size={13} className="animate-spin inline" />
-            : '[ENTER]'
-          }
+          {loading ? '◌' : '[ENTER]'}
         </button>
       </form>
 

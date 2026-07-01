@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Loader2, RefreshCw } from 'lucide-react';
 import { useRadar } from '@/hooks/useRadar';
 import { charColourClass } from '@/lib/radarApi';
 
@@ -59,7 +58,7 @@ export function RadarPanel({ lat, lon, locationName = '', zoom: initialZoom = 6 
         <span className="text-ansi-cyan">RADAR</span>
         <span className="text-ansi-dim ml-1 text-xs">precipitation map · RainViewer</span>
         {(isLoading || isFetching) && (
-          <Loader2 size={11} className="animate-spin ml-2 text-ansi-dim" />
+          <span className="text-ansi-dim ml-2 text-xs">◌</span>
         )}
       </button>
 
@@ -97,11 +96,10 @@ export function RadarPanel({ lat, lon, locationName = '', zoom: initialZoom = 6 
                 type="button"
                 onClick={() => refetch()}
                 disabled={isFetching}
-                className="text-ansi-dim hover:text-ansi-cyan transition-colors flex items-center gap-1"
+                className="text-ansi-dim hover:text-ansi-cyan transition-colors"
                 aria-label="Refresh radar"
               >
-                <RefreshCw size={11} className={isFetching ? 'animate-spin' : ''} />
-                [refresh]
+                {isFetching ? '◌' : '↻'} [refresh]
               </button>
             )}
 

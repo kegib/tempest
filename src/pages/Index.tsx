@@ -1,15 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useSeoMeta } from '@unhead/react';
-import { Loader2 } from 'lucide-react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { SearchBar } from '@/components/weather/SearchBar';
 import { CurrentWeatherCard } from '@/components/weather/CurrentWeatherCard';
 import { DailyForecastCard } from '@/components/weather/DailyForecastCard';
 import { ForecastTextBox } from '@/components/weather/ForecastTextBox';
 import { WeatherSkeleton } from '@/components/weather/WeatherSkeleton';
 import { TemperatureToggle } from '@/components/weather/TemperatureToggle';
-import { RadarPanel } from '@/components/weather/RadarPanel';
-import { WarningsPanel } from '@/components/weather/WarningsPanel';
 import { useWeather } from '@/hooks/useWeather';
+import { useDocMeta } from '@/hooks/useDocMeta';
+
+// Lazy-load heavier optional panels so they don't block initial paint
+const RadarPanel = lazy(() =>
+  import('@/components/weather/RadarPanel').then((m) => ({ default: m.RadarPanel }))
+);
+const WarningsPanel = lazy(() =>
+  import('@/components/weather/WarningsPanel').then((m) => ({ default: m.WarningsPanel }))
+);
 
 const DEFAULT_LOCATION = 'London';
 
@@ -20,14 +25,12 @@ export default function Index() {
 
   const { data, isLoading, isError, error, refetch, isFetching } = useWeather(location);
 
-  useSeoMeta({
+  useDocMeta({
     title: data
       ? `${data.location.city} – ${data.current.tempC}°C, ${data.current.description} | tmpst`
       : 'tmpst – Terminal Weather Forecasts',
     description:
       'Terminal-style weather forecasts powered by wttr.in. Search any city for current conditions and a 3-day outlook.',
-    ogTitle: 'tmpst',
-    ogDescription: 'Console-oriented weather forecasts inspired by wttr.in and wego.',
   });
 
   // Geolocation pre-fill (best-effort)
@@ -76,9 +79,7 @@ export default function Index() {
               <div className="flex items-center gap-4 shrink-0">
                 <TemperatureToggle useFahrenheit={useFahrenheit} onChange={setUseFahrenheit} />
                 {(isFetching && data) && (
-                  <span className="text-ansi-dim text-xs flex items-center gap-1">
-                    <Loader2 size={11} className="animate-spin" /> refreshing…
-                  </span>
+                  <span className="text-ansi-dim text-xs">↻ refreshing…</span>
                 )}
               </div>
             </div>
@@ -141,19 +142,23 @@ export default function Index() {
                 />
 
                 {/* Warnings & safety tips */}
-                <WarningsPanel
-                  location={data.location}
-                  current={data.current}
-                  forecast={data.forecast}
-                />
+                <Suspense fallback={null}>
+                  <WarningsPanel
+                    location={data.location}
+                    current={data.current}
+                    forecast={data.forecast}
+                  />
+                </Suspense>
 
                 {/* Radar section – uses already-resolved coordinates, no geocoding needed */}
-                <RadarPanel
-                  lat={data.location.lat}
-                  lon={data.location.lon}
-                  locationName={[data.location.city, data.location.country].filter(Boolean).join(', ')}
-                  zoom={6}
-                />
+                <Suspense fallback={null}>
+                  <RadarPanel
+                    lat={data.location.lat}
+                    lon={data.location.lon}
+                    locationName={[data.location.city, data.location.country].filter(Boolean).join(', ')}
+                    zoom={6}
+                  />
+                </Suspense>
 
                 {/* 3-day section header */}
                 <div className="flex items-center gap-2 text-ansi-dim text-xs pt-1">
@@ -213,7 +218,7 @@ export default function Index() {
                 <span>│</span>
                 <span>lat {data.location.lat.toFixed(3)}  lon {data.location.lon.toFixed(3)}</span>
                 <span>│</span>
-                <span>cache: {data ? 'HIT' : 'MISS'}</span>
+                <span>{isFetching ? 'fetching…' : 'ready'}</span>
               </>
             )}
             {!data && <span>no data loaded</span>}

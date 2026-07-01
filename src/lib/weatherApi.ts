@@ -86,7 +86,10 @@ function parseLocation(wttr: WttrResponse): LocationInfo {
 
 export async function fetchWeather(location: string): Promise<WeatherData> {
   const url = wttrUrl(location);
-  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  const res = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(10_000),
+  });
   if (!res.ok) {
     throw new Error(`Weather fetch failed: ${res.status} ${res.statusText}`);
   }

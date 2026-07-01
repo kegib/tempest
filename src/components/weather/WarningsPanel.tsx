@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Loader2, RefreshCw } from 'lucide-react';
 import { useWeatherTips } from '@/hooks/useWeatherTips';
 import type { WeatherWarning, SafetyTip, Severity } from '@/lib/weatherTips';
 import type { CurrentWeather, DailyForecast, LocationInfo } from '@/lib/weatherTypes';
@@ -45,10 +44,10 @@ function severityGlyph(s: Severity): string {
 
 function sourceLabel(source: WeatherWarning['source']): string {
   switch (source) {
-    case 'noaa':    return 'NOAA/NWS';
-    case 'owm':     return 'Open-Meteo';
-    case 'derived': return 'derived';
-    case 'static':  return 'static';
+    case 'noaa':       return 'NOAA/NWS';
+    case 'openmeteo':  return 'Open-Meteo';
+    case 'derived':    return 'derived';
+    case 'static':     return 'static';
   }
 }
 
@@ -196,17 +195,17 @@ export function WarningsPanel({ location, current, forecast }: Props) {
         )}
         <span className="text-ansi-dim ml-1 text-xs">safety · alerts</span>
         {(isLoading || isFetching) && (
-          <Loader2 size={11} className="animate-spin ml-2 text-ansi-dim" />
+          <span className="text-ansi-dim ml-2 text-xs">◌</span>
         )}
         {data && (
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); refetch(); }}
             disabled={isFetching}
-            className="ml-auto text-ansi-dim hover:text-ansi-cyan transition-colors"
+            className="ml-auto text-ansi-dim hover:text-ansi-cyan transition-colors text-xs"
             aria-label="Refresh warnings"
           >
-            <RefreshCw size={11} className={isFetching ? 'animate-spin' : ''} />
+            {isFetching ? '◌' : '↻'}
           </button>
         )}
       </button>

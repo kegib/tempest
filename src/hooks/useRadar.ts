@@ -22,8 +22,8 @@ export function useRadar({
   enabled = true,
 }: UseRadarOptions) {
   return useQuery<AsciiRadar, Error>({
-    // Cache key uses 'radar:' prefix so it never collides with forecast keys
-    queryKey: ['radar', lat, lon, zoom],
+    // Cache key includes all dimensions so different sizes don't share entries
+    queryKey: ['radar', lat, lon, zoom, cols, lines],
     queryFn: () => {
       if (lat === null || lon === null) throw new Error('No coordinates provided');
       return fetchRadar(lat, lon, locationName, zoom, cols, lines);

@@ -30,7 +30,7 @@ export type Severity = 'minor' | 'moderate' | 'severe' | 'extreme';
 
 export interface WeatherWarning {
   id: string;
-  source: 'noaa' | 'owm' | 'derived' | 'static';
+  source: 'noaa' | 'openmeteo' | 'derived' | 'static';
   event: string;
   headline: string;
   description: string;
@@ -113,6 +113,7 @@ async function fetchNoaaAlerts(lat: number, lon: number): Promise<WeatherWarning
   try {
     const res = await fetch(proxied(url), {
       headers: { Accept: 'application/geo+json', 'User-Agent': 'tmpst-weather-app' },
+      signal: AbortSignal.timeout(8_000),
     });
     if (!res.ok) return [];
     const json = await res.json();
@@ -157,7 +158,10 @@ async function fetchOpenMeteoAlerts(lat: number, lon: number): Promise<WeatherWa
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     `&weather_alerts=true&forecast_days=1&current=weather_alerts`;
   try {
-    const res = await fetch(proxied(url), { headers: { Accept: 'application/json' } });
+    const res = await fetch(proxied(url), {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(8_000),
+    });
     if (!res.ok) return [];
     const json = await res.json();
     const alerts: OpenMeteoAlert[] = json?.weather_alerts ?? [];
@@ -166,8 +170,8 @@ async function fetchOpenMeteoAlerts(lat: number, lon: number): Promise<WeatherWa
     return alerts.map((a, i) => {
       const tags = deriveTagsFromEvent(a.event ?? '');
       return {
-        id: `owm-${i}-${a.event ?? 'alert'}`,
-        source: 'owm' as const,
+        id: `openmeteo-${i}-${a.event ?? 'alert'}`,
+        source: 'openmeteo' as const,
         event: a.event ?? 'Weather Alert',
         headline: a.headline ?? a.event ?? 'Weather Alert',
         description: a.description?.replace(/\n/g, ' ').trim() ?? '',

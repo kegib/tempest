@@ -83,7 +83,10 @@ export interface RadarFrame {
 
 export async function fetchLatestRadarFrame(): Promise<RadarFrame> {
   const url = 'https://api.rainviewer.com/public/weather-maps.json';
-  const res = await fetch(proxied(url), { headers: { Accept: 'application/json' } });
+  const res = await fetch(proxied(url), {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(10_000),
+  });
   if (!res.ok) throw new Error(`RainViewer API failed: ${res.status}`);
   const json: RainViewerResponse = await res.json();
   const frames = json.radar?.past;
@@ -103,31 +106,26 @@ export function radarTileUrl(frame: RadarFrame, tile: TileCoord): string {
 // ─── 4. PNG → ASCII art ───────────────────────────────────────────────────────
 
 /**
- * Maps an RGBA pixel to a rain-intensity character.
+ * Maps an RGBA pixel to a rain-intensity level 0–5.
  *
- * RainViewer uses a standard DBZ colour scale rendered onto a transparent
- * background. We ignore the base-map layer entirely and only look at pixels
- * with significant alpha.  The colour gradient goes roughly:
- *   light blue  → light green → yellow → orange → red → purple  (increasing intensity)
+ * 0 = no data / transparent / achromatic
+ * 1 = · drizzle  (blue hues)
+ * 2 = ░ light    (cyan-green)
+ * 3 = ▒ moderate (green)
+ * 4 = ▓ heavy    (yellow/orange)
+ * 5 = █ extreme  (red/purple)
  *
- * We convert to HSL and use hue + saturation as a proxy for intensity:
- *   transparent / grey  →  ' '   (no precipitation)
- *   light / cool         →  '·'   (drizzle / light rain <0.5 mm/h)
- *   green                →  '░'   (light rain ~1 mm/h)
- *   yellow-green         →  '▒'   (moderate rain ~5 mm/h)
- *   yellow/orange        →  '▓'   (heavy rain ~15 mm/h)
- *   red/purple           →  '█'   (intense / extreme >50 mm/h)
+ * We convert to HSL and use hue + saturation as a proxy for DBZ intensity.
  */
-function pixelToChar(r: number, g: number, b: number, a: number): string {
-  if (a < 30) return ' '; // transparent – no data
+function pixelToLevel(r: number, g: number, b: number, a: number): number {
+  if (a < 30) return 0; // transparent – no data
 
-  // Normalise
   const rn = r / 255, gn = g / 255, bn = b / 255;
   const max = Math.max(rn, gn, bn);
   const min = Math.min(rn, gn, bn);
   const delta = max - min;
 
-  if (delta < 0.08) return ' '; // achromatic / grey – no precip
+  if (delta < 0.08) return 0; // achromatic / grey – no precip
 
   // Compute hue (0–360)
   let hue = 0;
@@ -136,42 +134,19 @@ function pixelToChar(r: number, g: number, b: number, a: number): string {
   else hue = 60 * ((rn - gn) / delta + 4);
   if (hue < 0) hue += 360;
 
-  const sat = max === 0 ? 0 : delta / max;
-  if (sat < 0.25) return ' ';
+  const sat = delta / max;
+  if (sat < 0.25) return 0;
 
-  // Map hue to intensity level
-  // Blues (180-240):     very light
-  // Cyans (160-180):     light
-  // Greens (90-160):     moderate
-  // Yellow-green (70-90): moderate-heavy
-  // Yellow/orange (30-70): heavy
-  // Red/pink (0-30 or 330-360): intense
-  // Purple (270-330):    extreme
-
-  if (hue >= 270 && hue <= 330) return '█'; // purple – extreme
-  if ((hue >= 330 || hue <= 20) && sat > 0.5) return '█'; // red   – intense
-  if (hue > 20 && hue <= 45) return '▓';  // orange
-  if (hue > 45 && hue <= 80) return '▓';  // yellow
-  if (hue > 80 && hue <= 130) return '▒'; // green
-  if (hue > 130 && hue <= 175) return '░'; // cyan-green
-  if (hue > 175 && hue <= 260) return '·'; // blue (lightest rain)
-  return ' ';
+  if (hue >= 270 && hue <= 330) return 5; // purple – extreme
+  if ((hue >= 330 || hue <= 20) && sat > 0.5) return 5; // red – intense
+  if (hue > 20 && hue <= 80)  return 4;  // orange/yellow – heavy
+  if (hue > 80 && hue <= 130) return 3;  // green – moderate
+  if (hue > 130 && hue <= 175) return 2; // cyan-green – light
+  if (hue > 175 && hue <= 260) return 1; // blue – drizzle
+  return 0;
 }
 
-/**
- * Collapses a block of `blockW × blockH` pixels into a single character by
- * taking the maximum intensity in the block.
- */
-const INTENSITY_ORDER = [' ', '·', '░', '▒', '▓', '█'];
-
-function maxChar(chars: string[]): string {
-  let best = 0;
-  for (const c of chars) {
-    const idx = INTENSITY_ORDER.indexOf(c);
-    if (idx > best) best = idx;
-  }
-  return INTENSITY_ORDER[best];
-}
+const INTENSITY_CHARS = [' ', '·', '░', '▒', '▓', '█'] as const;
 
 /**
  * ANSI terminal colour class for each intensity level.
@@ -231,7 +206,7 @@ export async function fetchRadar(
 
   // Step 4 – fetch PNG via CORS proxy and draw onto canvas
   const tileUrl = radarTileUrl(frame, tile);
-  const imgBlob = await fetch(proxied(tileUrl)).then((r) => {
+  const imgBlob = await fetch(proxied(tileUrl), { signal: AbortSignal.timeout(15_000) }).then((r) => {
     if (!r.ok) throw new Error(`Radar tile fetch failed: ${r.status}`);
     return r.blob();
   });
@@ -240,12 +215,16 @@ export async function fetchRadar(
   const TILE_SIZE = 512; // RainViewer tiles are 512×512
   const canvas = new OffscreenCanvas(TILE_SIZE, TILE_SIZE);
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('OffscreenCanvas context unavailable');
+  if (!ctx) {
+    bitmap.close();
+    throw new Error('OffscreenCanvas context unavailable');
+  }
   ctx.drawImage(bitmap, 0, 0);
+  bitmap.close(); // free GPU memory as soon as we have pixel data
   const { data: pixels } = ctx.getImageData(0, 0, TILE_SIZE, TILE_SIZE);
 
   // Step 5 – downsample to ASCII grid
-  // Each ASCII cell covers blockW × blockH pixels
+  // Track max intensity as an integer (0–5); no per-cell temporary arrays.
   const blockW = Math.floor(TILE_SIZE / cols);
   const blockH = Math.floor(TILE_SIZE / lines);
 
@@ -253,16 +232,15 @@ export async function fetchRadar(
   for (let row = 0; row < lines; row++) {
     const cells: string[] = [];
     for (let col = 0; col < cols; col++) {
-      const chars: string[] = [];
-      for (let py = 0; py < blockH; py++) {
-        for (let px = 0; px < blockW; px++) {
-          const imgX = col * blockW + px;
-          const imgY = row * blockH + py;
-          const idx = (imgY * TILE_SIZE + imgX) * 4;
-          chars.push(pixelToChar(pixels[idx], pixels[idx + 1], pixels[idx + 2], pixels[idx + 3]));
+      let maxLevel = 0;
+      for (let py = 0; py < blockH && maxLevel < 5; py++) {
+        for (let px = 0; px < blockW && maxLevel < 5; px++) {
+          const idx = ((row * blockH + py) * TILE_SIZE + (col * blockW + px)) * 4;
+          const level = pixelToLevel(pixels[idx], pixels[idx + 1], pixels[idx + 2], pixels[idx + 3]);
+          if (level > maxLevel) maxLevel = level;
         }
       }
-      cells.push(maxChar(chars));
+      cells.push(INTENSITY_CHARS[maxLevel]);
     }
     rows.push(cells);
   }
