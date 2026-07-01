@@ -139,6 +139,9 @@ export default function Index() {
                   useFahrenheit={useFahrenheit}
                 />
 
+                {/* Radar section */}
+                <RadarPanel location={location} zoom={6} />
+
                 {/* 3-day section header */}
                 <div className="flex items-center gap-2 text-ansi-dim text-xs pt-1">
                   <span>──</span>
@@ -158,9 +161,6 @@ export default function Index() {
                     />
                   ))}
                 </div>
-
-                {/* Radar section */}
-                <RadarPanel location={location} zoom={6} />
 
                 {/* wttr-style text section */}
                 <div>
