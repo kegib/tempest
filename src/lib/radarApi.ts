@@ -202,15 +202,19 @@ export interface AsciiRadar {
 }
 
 /**
- * Full pipeline: location string → AsciiRadar
+ * Full radar pipeline: coordinates → AsciiRadar
  *
- * @param location   City name / coordinates / zip
- * @param zoom       Slippy zoom level (default 6, range 1-10)
- * @param cols       Target ASCII art width in characters (default 60)
- * @param lines      Target ASCII art height in lines (default 22)
+ * @param lat          Latitude (already resolved by caller)
+ * @param lon          Longitude (already resolved by caller)
+ * @param locationName Display name for the header
+ * @param zoom         Slippy zoom level (default 6, range 1-10)
+ * @param cols         Target ASCII art width in characters (default 60)
+ * @param lines        Target ASCII art height in lines (default 22)
  */
 export async function fetchRadar(
-  location: string,
+  lat: number,
+  lon: number,
+  locationName: string,
   zoom = 6,
   cols = 60,
   lines = 22,
@@ -218,10 +222,8 @@ export async function fetchRadar(
   // Clamp zoom
   const z = Math.max(1, Math.min(10, zoom));
 
-  // Step 1 – geocode
-  const geo = await geocode(location);
-
-  // Step 2 – tile coordinate
+  // Step 1 – tile coordinate (lat/lon already resolved by caller)
+  const geo: GeoLocation = { lat, lon, name: locationName, country: '' };
   const tile = latLonToTile(geo.lat, geo.lon, z);
 
   // Step 3 – latest radar frame
@@ -270,9 +272,9 @@ export async function fetchRadar(
     cols,
     lines,
     timestamp: frame.time,
-    locationName: [geo.name, geo.country].filter(Boolean).join(', '),
-    lat: geo.lat,
-    lon: geo.lon,
+    locationName,
+    lat,
+    lon,
     zoom: z,
     tileX: tile.x,
     tileY: tile.y,

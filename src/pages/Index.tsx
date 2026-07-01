@@ -139,8 +139,13 @@ export default function Index() {
                   useFahrenheit={useFahrenheit}
                 />
 
-                {/* Radar section */}
-                <RadarPanel location={location} zoom={6} />
+                {/* Radar section – uses already-resolved coordinates, no geocoding needed */}
+                <RadarPanel
+                  lat={data.location.lat}
+                  lon={data.location.lon}
+                  locationName={[data.location.city, data.location.country].filter(Boolean).join(', ')}
+                  zoom={6}
+                />
 
                 {/* 3-day section header */}
                 <div className="flex items-center gap-2 text-ansi-dim text-xs pt-1">

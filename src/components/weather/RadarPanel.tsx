@@ -4,8 +4,12 @@ import { useRadar } from '@/hooks/useRadar';
 import { charColourClass } from '@/lib/radarApi';
 
 interface Props {
-  /** Location string passed directly to the radar pipeline */
-  location: string | null;
+  /** Latitude – already resolved from the weather data */
+  lat: number | null;
+  /** Longitude – already resolved from the weather data */
+  lon: number | null;
+  /** Display name shown in the box header */
+  locationName?: string;
   /** Slippy zoom level (1–10, default 6) */
   zoom?: number;
 }
@@ -21,12 +25,14 @@ const LEGEND: { char: string; label: string }[] = [
   { char: '█', label: 'extreme' },
 ];
 
-export function RadarPanel({ location, zoom: initialZoom = 6 }: Props) {
+export function RadarPanel({ lat, lon, locationName = '', zoom: initialZoom = 6 }: Props) {
   const [open, setOpen] = useState(false);
   const [zoom, setZoom] = useState(initialZoom);
 
   const { data, isLoading, isFetching, isError, error, refetch } = useRadar({
-    location,
+    lat,
+    lon,
+    locationName,
     zoom,
     cols: 60,
     lines: 22,
@@ -117,7 +123,6 @@ export function RadarPanel({ location, zoom: initialZoom = 6 }: Props) {
                 <span>┐</span>
               </div>
               <div className="border-l border-r border-[var(--ansi-dim)] px-3 py-3 text-ansi-dim text-xs space-y-0.5">
-                <div>Geocoding location…</div>
                 <div>Fetching RainViewer API…</div>
                 <div>Downloading radar tile…</div>
                 <div>Converting PNG → ASCII…</div>
