@@ -8,6 +8,7 @@ import { ForecastTextBox } from '@/components/weather/ForecastTextBox';
 import { WeatherSkeleton } from '@/components/weather/WeatherSkeleton';
 import { TemperatureToggle } from '@/components/weather/TemperatureToggle';
 import { RadarPanel } from '@/components/weather/RadarPanel';
+import { WarningsPanel } from '@/components/weather/WarningsPanel';
 import { useWeather } from '@/hooks/useWeather';
 
 const DEFAULT_LOCATION = 'London';
@@ -137,6 +138,13 @@ export default function Index() {
                   current={data.current}
                   location={data.location}
                   useFahrenheit={useFahrenheit}
+                />
+
+                {/* Warnings & safety tips */}
+                <WarningsPanel
+                  location={data.location}
+                  current={data.current}
+                  forecast={data.forecast}
                 />
 
                 {/* Radar section – uses already-resolved coordinates, no geocoding needed */}
