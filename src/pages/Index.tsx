@@ -58,7 +58,7 @@ export default function Index() {
         {/* Window title bar */}
         <div className="flex items-center gap-0 text-ansi-dim text-xs border-b border-[var(--ansi-dim)] pb-1 mb-0">
           <span className="text-ansi-green mr-2">●</span>
-          <span className="flex-1 text-ansi-dim">tmpst v1.0.0  —  bash  —  80×24</span>
+          <span className="flex-1 text-ansi-dim">tmpst v0.5  —  bash  —  80×24</span>
           <span className="text-ansi-dim">{dateStr}  {timeStr}</span>
         </div>
 
